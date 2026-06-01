@@ -61,8 +61,6 @@ def ask(data: QuestionRequest):
         "answer": answer
     }
 
-print("API KEY =", os.getenv("GROQ_API_KEY"))
-
 client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
