@@ -5,6 +5,9 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
 from groq import Groq
+from scraper import scrape_website
+from db import add_documents
+from rag import ask_rag
 load_dotenv()
 app = FastAPI()
 
@@ -22,45 +25,39 @@ def home(request: Request):
         name="index.html"
     )
 class QuestionRequest(BaseModel):
-    context: str
     question: str
+class URLRequest(BaseModel):
+    url: str
+# 
+@app.post("/index")
+def index_website(data: URLRequest):
+
+    print("URL RECEIVED:", data.url)
+
+    website_text = scrape_website(
+        data.url
+    )
+
+    chunk_count = add_documents(
+        website_text
+    )
+
+    return {
+        "message":
+        f"Website indexed successfully. {chunk_count} chunks stored."
+    }
+# 
 @app.post("/ask")
 def ask(data: QuestionRequest):
 
-    response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-
-        messages=[
-            {
-                "role": "system",
-                "content":
-                """
-                Answer ONLY using the provided context.
-                If the answer is not in the context,
-                say:
-                'I cannot find that information in the provided text.'
-                """
-            },
-            {
-                "role": "user",
-                "content":
-                f"""
-                Context:
-                {data.context}
-
-                Question:
-                {data.question}
-                """
-            }
-        ]
+    answer = ask_rag(
+        data.question
     )
-
-    answer = response.choices[0].message.content
 
     return {
         "answer": answer
     }
-
+# 
 client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
@@ -69,6 +66,6 @@ client = Groq(
 ##to activate virtual environment
 #.\venv\Scripts\activate
 ##to install python packages
-#pip install fastapi uvicorn groq python-dotenv jinja2
+#pip install fastapi uvicorn groq python-dotenv jinja2 chromadb sentence-transformers beautifulsoup4 requests
 #to run the app
 # uvicorn main:app --reload  

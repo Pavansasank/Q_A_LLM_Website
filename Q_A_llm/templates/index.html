@@ -2,27 +2,32 @@
 <html>
 
 <head>
-    <title>LLM QA App</title>
+    <title>Website RAG App</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
 
-    <h1>Ask Questions From Text</h1>
+    <h1>Website Question Answering</h1>
 
-    <textarea
-        id="context"
-        rows="10"
-        cols="80"
-        placeholder="Paste text here">
-    </textarea>
+    <input
+        id="url"
+        type="text"
+        placeholder="Enter website URL">
+
+    <br><br>
+
+    <button onclick="indexWebsite()">
+        Index Website
+    </button>
+
+    <div id="status"></div>
 
     <br><br>
 
     <input
         id="question"
         type="text"
-        size="80"
         placeholder="Ask a question">
 
     <br><br>
